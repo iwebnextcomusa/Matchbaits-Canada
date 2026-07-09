@@ -1,0 +1,6 @@
+{
+  "name": "Matchbaits Canada",
+  "description": "Premium Fishing Baits and Tackle for Canadian Anglers - Helping anglers catch more fish with quality bait, trusted products, and expert fishing advice.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
