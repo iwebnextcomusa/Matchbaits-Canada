@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Product, Review } from "../types";
 import { PRODUCTS } from "../data";
 import { Star, ShoppingCart, Heart, Search, SlidersHorizontal, Check, ArrowRight, Eye, Sparkles } from "lucide-react";
@@ -9,6 +9,67 @@ interface ProductsProps {
   wishlist: string[];
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+}
+
+// Beautiful skeleton loader matching the real card structure exactly
+function ProductSkeleton() {
+  return (
+    <div className="bg-slate-900/60 rounded-2xl border border-slate-800/80 overflow-hidden flex flex-col h-full animate-pulse">
+      {/* Image placeholder with subtle gradient shimmer */}
+      <div className="relative aspect-square bg-slate-950 overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/40 to-slate-950 animate-pulse" />
+        
+        {/* Decorative spinner for perceived performance */}
+        <div className="w-12 h-12 rounded-full bg-slate-900/80 border border-slate-800/50 flex items-center justify-center z-10 shadow-lg">
+          <div className="w-5 h-5 rounded-full border-2 border-emerald-500/20 border-t-emerald-500/80 animate-spin" />
+        </div>
+        
+        {/* Wishlist Button Placeholder */}
+        <div className="absolute top-4 right-4 w-9 h-9 rounded-xl bg-slate-900/80 border border-slate-800/50" />
+        
+        {/* Category Label Placeholder */}
+        <div className="absolute bottom-4 left-4 h-5 w-20 bg-slate-900/80 border border-slate-800/50 rounded-lg" />
+      </div>
+
+      {/* Details placeholder */}
+      <div className="p-6 flex-1 flex flex-col justify-between">
+        <div>
+          {/* Rating placeholder */}
+          <div className="flex items-center gap-1.5 mb-3">
+            <div className="flex gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="w-3 h-3 rounded-full bg-slate-800/80" />
+              ))}
+            </div>
+            <div className="h-3 w-8 bg-slate-800/80 rounded" />
+          </div>
+
+          {/* Name placeholder */}
+          <div className="h-6 bg-slate-800/80 rounded-lg w-3/4 mb-3" />
+
+          {/* Description placeholder */}
+          <div className="space-y-2 mb-4">
+            <div className="h-3 bg-slate-800/50 rounded-md w-full" />
+            <div className="h-3 bg-slate-800/50 rounded-md w-11/12" />
+            <div className="h-3 bg-slate-800/50 rounded-md w-4/5" />
+          </div>
+        </div>
+
+        {/* Bottom row placeholder */}
+        <div className="mt-6 pt-4 border-t border-slate-800/60 flex items-center justify-between">
+          <div className="space-y-1.5">
+            <div className="h-2.5 bg-slate-800/50 rounded w-10" />
+            <div className="h-5 bg-slate-800 rounded w-24" />
+          </div>
+          
+          <div className="flex gap-2">
+            <div className="w-9 h-9 bg-slate-800 rounded-xl" />
+            <div className="w-16 h-9 bg-slate-800 rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function Products({
@@ -27,18 +88,48 @@ export default function Products({
   const [reviewComment, setReviewComment] = useState("");
   const [activeTabProductModal, setActiveTabProductModal] = useState<"features" | "reviews">("features");
 
+  // Premium loading state and debouncing to prevent excessive updates while typing or sliding
+  const [isLoading, setIsLoading] = useState(false);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+  const [debouncedMaxPrice, setDebouncedMaxPrice] = useState(maxPrice);
+
+  // Debounce search input (300ms) to ensure typed filter is smooth
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Debounce max price range slider (150ms) to ensure dragging is fluid
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedMaxPrice(maxPrice);
+    }, 150);
+    return () => clearTimeout(handler);
+  }, [maxPrice]);
+
+  // Simulate remote bait catalogue lookup on filter/sort changes (500ms)
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [selectedCategory, debouncedMaxPrice, sortBy, debouncedSearchQuery]);
+
   const categories = ["All", "Groundbait", "Pellets", "Boilies", "Hookbait", "Liquid Attractants", "Fishing Accessories", "Terminal Tackle"];
 
-  // Filter and Sort Logic
+  // Filter and Sort Logic (Uses debounced values to perfectly sync with the skeleton loader)
   const filteredProducts = useMemo(() => {
     return PRODUCTS.filter((product) => {
       const matchesSearch =
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase());
+        product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
 
       const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
-      const matchesPrice = product.price <= maxPrice;
+      const matchesPrice = product.price <= debouncedMaxPrice;
 
       return matchesSearch && matchesCategory && matchesPrice;
     }).sort((a, b) => {
@@ -47,7 +138,7 @@ export default function Products({
       if (sortBy === "rating") return b.rating - a.rating;
       return b.reviewsCount - a.reviewsCount; // popular
     });
-  }, [selectedCategory, maxPrice, sortBy, searchQuery]);
+  }, [selectedCategory, debouncedMaxPrice, sortBy, debouncedSearchQuery]);
 
   // Handle adding a review locally
   const handleAddReview = (e: React.FormEvent, productId: string) => {
@@ -175,8 +266,14 @@ export default function Products({
         </div>
 
         {/* Products Grid */}
-        {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="products-grid">
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="products-grid-skeleton">
+            {[...Array(6)].map((_, idx) => (
+              <ProductSkeleton key={idx} />
+            ))}
+          </div>
+        ) : filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in" id="products-grid">
             {filteredProducts.map((product) => {
               const isInWishlist = wishlist.includes(product.id);
               return (

@@ -1,5 +1,4 @@
 import { ArrowRight, Trophy, Sparkles, MapPin, Compass } from "lucide-react";
-import heroBgImage from "../assets/images/premium_fishing_baits_and_tackle_1783635927992.jpg";
 
 interface HeroProps {
   setCurrentTab: (tab: string) => void;
@@ -9,17 +8,19 @@ export default function Hero({ setCurrentTab }: HeroProps) {
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white pt-10 pb-20">
       
-      {/* Majestic Canadian Fishing Baits & Tackle Background Image */}
+      {/* Majestic Canadian Fishing Baits & Tackle Background Video */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden" style={{ zIndex: 0 }}>
-        <img
-          src={heroBgImage}
-          alt="Premium Fishing Baits and Tackle"
-          className="w-full h-full object-cover opacity-55 scale-100 select-none pointer-events-none filter brightness-75 contrast-105 saturate-[0.95]"
-          referrerPolicy="no-referrer"
+        <video
+          src="https://rdi1s81m6obs8rhn.public.blob.vercel-storage.com/Create_video_Matchbaits_Canada_f%E2%80%A6_202607100317.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-full object-cover opacity-85 scale-100 select-none pointer-events-none filter brightness-90 contrast-105 saturate-[0.95]"
         />
-        {/* Deep, rich cinematic overlay matching the sophisticated dark branding */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/60 to-slate-950/90" />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950" />
+        {/* Deep, rich cinematic overlay matching the sophisticated dark branding but scaled back for higher visibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-900/30 to-slate-950/75" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-transparent to-slate-950/90" />
       </div>
 
       {/* Decorative ambient gradients */}
