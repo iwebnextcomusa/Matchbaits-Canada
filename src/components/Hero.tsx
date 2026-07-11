@@ -1,19 +1,33 @@
-import { ArrowRight, Trophy, Sparkles, MapPin, Compass } from "lucide-react";
+import { useState, useRef } from "react";
+import { ArrowRight, Trophy, Sparkles, MapPin, Compass, Volume2, VolumeX } from "lucide-react";
 
 interface HeroProps {
   setCurrentTab: (tab: string) => void;
 }
 
 export default function Hero({ setCurrentTab }: HeroProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isMuted, setIsMuted] = useState(true);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      // Toggle browser-level video element mute state
+      const nextMuted = !videoRef.current.muted;
+      videoRef.current.muted = nextMuted;
+      setIsMuted(nextMuted);
+    }
+  };
+
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white pt-10 pb-20">
       
       {/* Majestic Canadian Fishing Baits & Tackle Background Video */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden" style={{ zIndex: 0 }}>
         <video
+          ref={videoRef}
           src="https://rdi1s81m6obs8rhn.public.blob.vercel-storage.com/Create_video_Matchbaits_Canada_f%E2%80%A6_202607100317.mp4"
           autoPlay
-          muted
+          muted={isMuted}
           loop
           playsInline
           className="w-full h-full object-cover opacity-85 scale-100 select-none pointer-events-none filter brightness-90 contrast-105 saturate-[0.95]"
@@ -21,6 +35,23 @@ export default function Hero({ setCurrentTab }: HeroProps) {
         {/* Deep, rich cinematic overlay matching the sophisticated dark branding but scaled back for higher visibility */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-900/30 to-slate-950/75" />
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-transparent to-slate-950/90" />
+      </div>
+
+      {/* Floating Mute/Unmute Control */}
+      <div className="absolute bottom-16 right-6 sm:right-8 z-30">
+        <button
+          onClick={toggleMute}
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-slate-950/80 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-white shadow-xl backdrop-blur-md transition-all hover:scale-105 active:scale-95 group cursor-pointer"
+          title={isMuted ? "Unmute Video Audio" : "Mute Video Audio"}
+          aria-label={isMuted ? "Unmute video audio" : "Mute video audio"}
+          id="hero-mute-toggle"
+        >
+          {isMuted ? (
+            <VolumeX size={18} className="text-slate-400 group-hover:text-emerald-400 transition-colors" />
+          ) : (
+            <Volume2 size={18} className="text-emerald-400 animate-pulse" />
+          )}
+        </button>
       </div>
 
       {/* Decorative ambient gradients */}
